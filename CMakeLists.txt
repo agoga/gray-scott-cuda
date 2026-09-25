@@ -41,14 +41,12 @@ target_link_libraries(gray_scott_core PUBLIC CUDA::cudart)
 add_executable(gray_scott_cli
     src/main.cpp
 )
-target_include_directories(gray_scott_cli PRIVATE include)
 target_link_libraries(gray_scott_cli PRIVATE gray_scott_core)
 
 pybind11_add_module(_gray_scott
     src/python_module.cpp
 )
 target_link_libraries(_gray_scott PRIVATE gray_scott_core)
-target_include_directories(_gray_scott PRIVATE include)
 
 # Keep generated Python files under the build tree. The wrapper is copied beside
 # the extension so the build output is itself importable with PYTHONPATH.

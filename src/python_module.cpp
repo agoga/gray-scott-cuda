@@ -8,8 +8,10 @@ namespace {
 
 /* pybind11 maps this thin wrapper to Python. The actual run is shared with
    the CLI, and releasing the GIL lets other Python threads run while CUDA works. */
-void simulate(const SimulationConfig& config, Backend backend, const std::string& gif_path,
+void simulate(SimulationConfig config, Backend backend, const std::string& gif_path,
               int fps, bool include_step_number) {
+    // Copy the config before releasing the GIL so Python cannot change this run.
+    py::gil_scoped_release release;
     run_simulation(config, backend, gif_path, fps, include_step_number);
 }
 
@@ -48,6 +50,5 @@ PYBIND11_MODULE(_gray_scott, module) {
                py::arg("backend") = Backend::Cuda,
                py::arg("gif_path") = "",
                py::arg("fps") = 10,
-               py::arg("include_step_number") = false,
-               py::call_guard<py::gil_scoped_release>());
+               py::arg("include_step_number") = false);
 }

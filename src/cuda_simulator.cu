@@ -76,21 +76,21 @@ public:
     }
 
     void reset(const SimulationConfig& config) override {
+        std::vector<float> u, v;
+        initialize_fields(config, u, v);
         config_ = config;
-        const std::size_t count = static_cast<std::size_t>(config.width) * config.height;
+        const std::size_t count = u.size();
         cudaFree(u_);
         cudaFree(v_);
         cudaFree(next_u_);
         cudaFree(next_v_);
+        u_ = v_ = next_u_ = next_v_ = nullptr;
         check_cuda(cudaMalloc(&u_, count * sizeof(float)), "cudaMalloc U");
         check_cuda(cudaMalloc(&v_, count * sizeof(float)), "cudaMalloc V");
         check_cuda(cudaMalloc(&next_u_, count * sizeof(float)), "cudaMalloc next U");
         check_cuda(cudaMalloc(&next_v_, count * sizeof(float)), "cudaMalloc next V");
 
-        std::vector<float> u(count, 1.0f);
-        std::vector<float> v(count, 0.0f);
         // Build the initial field on the CPU and copy it once; the GPU handles every later step.
-        initialize_fields(config, u, v);
         check_cuda(cudaMemcpy(u_, u.data(), count * sizeof(float), cudaMemcpyHostToDevice),
                "copy initial U");
         check_cuda(cudaMemcpy(v_, v.data(), count * sizeof(float), cudaMemcpyHostToDevice),

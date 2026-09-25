@@ -1,8 +1,6 @@
 #include "gray_scott/simulation.hpp"
 #include "gray_scott/initial_conditions.hpp"
 
-#include <algorithm>
-
 /*
     This is the plain reference version of the model. Keeping it readable is
     useful when checking that the CUDA kernel is applying the same equations.
@@ -23,13 +21,22 @@ public:
     }
 
     void step() override {
+        const int width = config_.width;
+        const int height = config_.height;
         for (int y = 0; y < config_.height; ++y) {
+            const std::size_t row = static_cast<std::size_t>(y) * width;
+            const std::size_t top_row = static_cast<std::size_t>(y == 0 ? height - 1 : y - 1) * width;
+            const std::size_t bottom_row = static_cast<std::size_t>(y == height - 1 ? 0 : y + 1) * width;
             for (int x = 0; x < config_.width; ++x) {
-                const std::size_t index = at(x, y);
+                const std::size_t index = row + x;
+                const std::size_t left = row + (x == 0 ? width - 1 : x - 1);
+                const std::size_t right = row + (x == width - 1 ? 0 : x + 1);
+                const std::size_t top = top_row + x;
+                const std::size_t bottom = bottom_row + x;
                 const float u = u_[index];
                 const float v = v_[index];
-                const float laplace_u = laplace(u_, x, y);
-                const float laplace_v = laplace(v_, x, y);
+                const float laplace_u = u_[left] + u_[right] + u_[top] + u_[bottom] - 4.0f * u;
+                const float laplace_v = v_[left] + v_[right] + v_[top] + v_[bottom] - 4.0f * v;
                 const float reaction = u * v * v;
 
                 next_u_[index] = u + config_.timestep *
@@ -45,26 +52,13 @@ public:
     void snapshot(Frame& frame) override {
         frame.width = config_.width;
         frame.height = config_.height;
-        frame.value.resize(v_.size());
-        std::copy(v_.begin(), v_.end(), frame.value.begin());
+        frame.value = v_;
     }
 
     void finish() override {
     }
 
 private:
-    std::size_t at(int x, int y) const {
-        // Wrapping makes patterns flow across an edge instead of hitting a wall.
-        x = (x + config_.width) % config_.width;
-        y = (y + config_.height) % config_.height;
-        return static_cast<std::size_t>(y) * config_.width + x;
-    }
-
-    float laplace(const std::vector<float>& field, int x, int y) const {
-        return field[at(x - 1, y)] + field[at(x + 1, y)] +
-               field[at(x, y - 1)] + field[at(x, y + 1)] - 4.0f * field[at(x, y)];
-    }
-
     SimulationConfig config_;
     std::vector<float> u_;
     std::vector<float> v_;

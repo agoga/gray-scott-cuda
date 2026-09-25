@@ -4,13 +4,13 @@
 #include "gif.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-/* The simulator produces normalized V values in the range 0..1. This class
-    converts those values to grayscale RGBA pixels and hands each sampled frame
+/* This class clamps V values to 0..1 for grayscale RGBA pixels and hands each sampled frame
     to the GIF encoder. It is deliberately separate from the simulation math. */
 struct AnimationGifWriter::State {
     ::GifWriter gif{};
@@ -18,7 +18,6 @@ struct AnimationGifWriter::State {
     int height = 0;
     int delay_cs = 1;
     std::vector<uint8_t> pixels;
-    bool closed = false;
 };
 
 AnimationGifWriter::AnimationGifWriter(const std::string& path, int width, int height, int frame_delay_cs)
@@ -38,7 +37,7 @@ AnimationGifWriter::~AnimationGifWriter() {
 }
 
 void AnimationGifWriter::add_frame(const Frame& frame, int step, bool include_step_number) {
-    if (state_ == nullptr || state_->closed) {
+    if (state_ == nullptr) {
         throw std::runtime_error("Cannot add a frame to a closed GIF.");
     }
     if (frame.width != state_->width || frame.height != state_->height) {
@@ -46,6 +45,9 @@ void AnimationGifWriter::add_frame(const Frame& frame, int step, bool include_st
     }
 
     for (std::size_t i = 0; i < frame.value.size(); ++i) {
+        if (!std::isfinite(frame.value[i])) {
+            throw std::runtime_error("Simulation produced a non-finite concentration; try a smaller timestep.");
+        }
         const auto brightness = static_cast<uint8_t>(
             std::clamp(frame.value[i], 0.0f, 1.0f) * 255.0f);
         state_->pixels[i * 4 + 0] = brightness;
@@ -120,9 +122,6 @@ void AnimationGifWriter::close() {
     if (state_ == nullptr) {
         return;
     }
-    if (!state_->closed) {
-        GifEnd(&state_->gif);
-        state_->closed = true;
-    }
+    GifEnd(&state_->gif);
     state_.reset();
 }
