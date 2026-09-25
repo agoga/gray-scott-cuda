@@ -55,8 +55,8 @@ void AnimationGifWriter::add_frame(const Frame& frame, int step, bool include_st
     }
 
     if (include_step_number) {
-          /* A tiny built-in digit font avoids pulling a text-rendering system into
-              the simulation just to label saved frames. */
+        /* A tiny built-in digit font avoids pulling a text-rendering system into
+           the simulation just to label saved frames. */
         const uint8_t digits[10][5] = {
             {0b111, 0b101, 0b101, 0b101, 0b111},
             {0b010, 0b110, 0b010, 0b010, 0b111},

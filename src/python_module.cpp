@@ -7,10 +7,10 @@ namespace py = pybind11;
 namespace {
 
 /* pybind11 maps this thin wrapper to Python. The actual run is shared with
-    the CLI, and releasing the GIL lets other Python threads run while CUDA works. */
+   the CLI, and releasing the GIL lets other Python threads run while CUDA works. */
 void simulate(const SimulationConfig& config, Backend backend, const std::string& gif_path,
-                  int fps, bool include_step_number) {
-     run_simulation(config, backend, gif_path, fps, include_step_number);
+              int fps, bool include_step_number) {
+    run_simulation(config, backend, gif_path, fps, include_step_number);
 }
 
 } // namespace

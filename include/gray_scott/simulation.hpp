@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+/* This header defines the simulation layer. It knows about fields, parameters,
+   and CPU/CUDA backends, but not about Python, the CLI, or GIF files. */
+
 enum class Backend {
     Cpu,
     Cuda,
@@ -36,12 +39,14 @@ struct SimulationConfig {
 struct Frame {
     int width = 0;
     int height = 0;
-    std::vector<float> value;
+    std::vector<float> value; // The V concentration field, row-major, copied only for output.
 };
 
 class Simulator {
 public:
     virtual ~Simulator() = default;
+    // A run is reset once, stepped many times, sampled when output needs a frame,
+    // and finished once so asynchronous GPU errors are reported.
     virtual void reset(const SimulationConfig& config) = 0;
     virtual void step() = 0;
     virtual void snapshot(Frame& frame) = 0;

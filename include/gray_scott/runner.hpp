@@ -4,7 +4,8 @@
 
 #include <string>
 
-// Run the configured simulation and optionally write sampled frames as a GIF.
+/* The backends only know how to reset, step, and provide a frame. This runner
+    owns one complete run and is shared by both the CLI and Python binding. */
 void run_simulation(const SimulationConfig& config,
                     Backend backend,
                     const std::string& gif_path = {},

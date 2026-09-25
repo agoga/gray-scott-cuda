@@ -1,3 +1,2 @@
 # Keep the experiment notebook visible without letting it dominate the language bar.
 *.ipynb linguist-detectable=false
-

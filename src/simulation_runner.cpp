@@ -6,6 +6,8 @@
 #include <memory>
 #include <stdexcept>
 
+/* Keeping this loop here prevents the CLI and Python binding from growing
+    separate versions of the same simulation and GIF-writing workflow. */
 void run_simulation(const SimulationConfig& config,
                     Backend backend,
                     const std::string& gif_path,

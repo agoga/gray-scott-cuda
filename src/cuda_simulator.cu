@@ -112,6 +112,8 @@ public:
     }
 
     void snapshot(Frame& frame) override {
+        // This is the intentional device-to-host boundary. Normal simulation
+        // steps stay on the GPU; only requested output frames are copied back.
         frame.width = config_.width;
         frame.height = config_.height;
         frame.value.resize(static_cast<std::size_t>(config_.width) * config_.height);

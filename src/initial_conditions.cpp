@@ -5,6 +5,9 @@
 #include <random>
 #include <stdexcept>
 
+/* All backends start from the same host-side fields. U starts at 1 and V at 0;
+    each selected pattern changes some cells to U=0.5 and V=0.25. Keeping this
+    here prevents the CPU and CUDA versions from quietly starting differently. */
 void initialize_fields(const SimulationConfig& config,
                        std::vector<float>& u,
                        std::vector<float>& v) {
