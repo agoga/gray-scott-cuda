@@ -1,6 +1,6 @@
 # Keep the experiment notebook visible without letting it dominate the language bar.
 *.ipynb linguist-detectable=false
-*
+
 # Count CUDA source with the C++ implementation.
 *.cu linguist-language=C++
 *.cuh linguist-language=C++
