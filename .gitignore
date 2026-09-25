@@ -1,0 +1,11 @@
+build/
+*.pyd
+*.dll
+*.lib
+*.exp
+*.pdb
+*.obj
+*.gif
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
